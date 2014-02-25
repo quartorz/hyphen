@@ -13,7 +13,7 @@ int run()
 		return 0;
 
 	main_window w;
-	if(!w.create(nullptr/*, L"hyphen"*/))
+	if(!w.create(nullptr, L"hyphen"))
 		return 0;
 
 	w.show();
