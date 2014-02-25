@@ -30,7 +30,8 @@ inline void ListBox_OnPaint(HWND hwnd)
 
 inline void ListBox_OnKey(HWND hwnd, UINT vk, BOOL fDown, int cRepeat, UINT flags)
 {
-	//return FORWARD_WM_KEYDOWN(hwnd, vk, cRepeat, flags, ::DefSubclassProc);
+	if(vk != VK_LEFT && vk != VK_UP && vk != VK_RIGHT && vk != VK_DOWN)
+		return FORWARD_WM_KEYDOWN(hwnd, vk, cRepeat, flags, ::DefSubclassProc);
 }
 
 inline LRESULT CALLBACK ListBox_WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR nIdSubclass, DWORD_PTR dwRefData)
