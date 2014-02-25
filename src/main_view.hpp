@@ -18,6 +18,9 @@ public:
 	main_view(main_window &);
 	~main_view();
 
+	void set_bar_pos(int pos);
+	int get_bar_pos();
+
 	bool add_file(const std::wstring &);
 	void delete_file(int);
 	void select_file(const std::wstring &, int);
@@ -57,6 +60,16 @@ inline main_view_type::~main_view()
 	this->unregister_object(view.get());
 	this->unregister_object(list.get());
 	this->unregister_object(bar.get());
+}
+
+inline void main_view_type::set_bar_pos(int pos)
+{
+	bar->set_position({static_cast<float>(pos), 0});
+}
+
+inline int main_view_type::get_bar_pos()
+{
+	return static_cast<int>(bar->get_position().x);
 }
 
 inline bool main_view_type::add_file(const std::wstring &s)

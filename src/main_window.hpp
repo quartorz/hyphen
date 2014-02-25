@@ -15,6 +15,9 @@ namespace win32 = quote::win32;
 namespace direct2d = quote::direct2d;
 
 #include <memory>
+#include <fstream>
+
+#include <direct.h>
 
 const int REDRAW_TIMER = 100;
 const int IDC_PICTURE_LIST = 1000;
@@ -28,6 +31,7 @@ class main_window:
 		win32::timer<main_window>,
 		win32::keyboard<main_window>,
 		win32::resizer<main_window>,
+		win32::mover<main_window>,
 		win32::drop_files<main_window>,
 		win32::object_processor<main_window, direct2d::traits>,
 		direct2d::painter<main_window>,
@@ -38,6 +42,8 @@ class main_window:
 	class main_view;
 
 	std::unique_ptr<main_view> view;
+
+	std::wstring path;
 
 	std::vector<std::wstring> files;
 	int index = -1;
@@ -50,6 +56,10 @@ public:
 
 	bool initialize();
 	void uninitialize();
+
+	void on_move(...)
+	{
+	}
 
 	std::size_t get_file_count() const;
 
@@ -69,11 +79,56 @@ inline bool main_window::initialize()
 	this->add_scene(0, view.get());
 	this->select_scene(0);
 
+	wchar_t path[_MAX_PATH];
+	::GetModuleFileNameW(nullptr, path, _MAX_PATH);
+	::wcsrchr(path, L'\\')[1] = L'\0';
+	this->path = path;
+	auto file = std::wifstream((this->path + L"config.dat"), std::ios::in);
+	if(file.is_open()){
+		quote::data<wchar_t> data = quote::data<wchar_t>::parse(file);
+		int w = std::stoi(data.map()[L"size"].vector()[0].string()), h = std::stoi(data.map()[L"size"].vector()[1].string());
+		this->set_size(w, h);
+		this->set_position(std::stoi(data.map()[L"position"].vector()[0].string()), std::stoi(data.map()[L"position"].vector()[1].string()));
+		view->set_size({static_cast<float>(w), static_cast<float>(h)});
+		view->set_bar_pos(std::stoi(data.map()[L"bar position"].string()));
+	}else{
+		this->set_size(1400, 800);
+		view->set_size({1400, 800});
+		view->set_bar_pos(1000);
+	}
+
 	return true;
 }
 
 inline void main_window::uninitialize()
 {
+	std::wofstream ofs((path + L"config.dat"), std::ios::out);
+	if(ofs.is_open()){
+		quote::data<wchar_t> data;
+
+		data.make_map();
+
+		int w, h;
+		std::tie(w, h) = this->get_size();
+		data.map()[L"size"].make_vector();
+		data.map()[L"size"].vector().emplace_back();
+		data.map()[L"size"].vector()[0].set_string(std::to_wstring(w));
+		data.map()[L"size"].vector().emplace_back();
+		data.map()[L"size"].vector()[1].set_string(std::to_wstring(h));
+
+		int x, y;
+		std::tie(x, y) = this->get_position();
+		data.map()[L"position"].make_vector();
+		data.map()[L"position"].vector().emplace_back();
+		data.map()[L"position"].vector()[0].set_string(std::to_wstring(x));
+		data.map()[L"position"].vector().emplace_back();
+		data.map()[L"position"].vector()[1].set_string(std::to_wstring(y));
+
+		data.map()[L"bar position"].set_string(std::to_wstring(view->get_bar_pos()));
+
+		data.save(ofs, true);
+	}
+
 	this->remove_scene(0);
 }
 
