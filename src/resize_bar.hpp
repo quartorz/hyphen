@@ -36,7 +36,7 @@ public:
 		rect.left += 1;
 		rect.right -= 1;
 		pp.target->PushAxisAlignedClip(rect, D2D1_ANTIALIAS_MODE_ALIASED);
-		pp.target->Clear();
+		pp.target->Clear(direct2d::color(255, 255, 255, 80));
 		pp.target->PopAxisAlignedClip();
 	}
 	bool is_colliding(const direct2d::point &ap) override

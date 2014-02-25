@@ -23,6 +23,7 @@ public:
 	void select_file(const std::wstring &, int);
 
 	void set_size(const direct2d::size &) override;
+	void draw(const direct2d::paint_params &pp) override;
 }main_view_type;
 
 #include "picture_view.hpp"
@@ -85,4 +86,10 @@ inline void main_view_type::set_size(const direct2d::size &s)
 	auto p = bar->get_position();
 	bar->set_position({p.x + s.width - size.width, 0});
 	bar->set_size({3, s.height});
+}
+
+inline void main_view_type::draw(const direct2d::paint_params &pp)
+{
+	pp.target->Clear();
+	this->direct2d::scene<>::draw(pp);
 }

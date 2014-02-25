@@ -18,7 +18,7 @@ int run()
 
 	w.show();
 
-	auto fc = win32::make_frame_controller<REDRAW_TIMER, 30>(w);
+	auto fc = win32::make_frame_controller<REDRAW_TIMER, 60>(w);
 
 	BOOL ret;
 	MSG msg;

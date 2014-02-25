@@ -9,6 +9,8 @@
 #include <quote/direct2d/painter.hpp>
 #include <quote/direct2d/scene_manager.hpp>
 
+#include <quote/data.hpp>
+
 namespace win32 = quote::win32;
 namespace direct2d = quote::direct2d;
 
@@ -88,7 +90,7 @@ void main_window::on_drop_files(const std::vector<std::wstring> &files)
 			flag = true;
 	}
 	if(flag && files.size() != 0)
-		select_file(files.size() - 1);
+		select_file(this->files.size() - 1);
 }
 
 void main_window::select_file(int index)
