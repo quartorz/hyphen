@@ -44,6 +44,7 @@ class main_window:
 	std::unique_ptr<main_view> view;
 
 	std::wstring path;
+	int showstate, barpos;
 
 	std::vector<std::wstring> files;
 	int index = -1;
@@ -53,6 +54,8 @@ public:
 	{
 		return L"hyphen";
 	}
+
+	void show();
 
 	bool initialize();
 	void uninitialize();
@@ -73,6 +76,12 @@ public:
 
 #include "main_view.hpp"
 
+inline void main_window::show()
+{
+	::ShowWindow(this->get_hwnd(), showstate);
+	view->set_bar_pos(barpos);
+}
+
 inline bool main_window::initialize()
 {
 	view = std::make_unique<main_view>(*this);
@@ -86,11 +95,18 @@ inline bool main_window::initialize()
 	auto file = std::wifstream((this->path + L"config.dat"), std::ios::in);
 	if(file.is_open()){
 		quote::data<wchar_t> data = quote::data<wchar_t>::parse(file);
-		int w = std::stoi(data.map()[L"size"].vector()[0].string()), h = std::stoi(data.map()[L"size"].vector()[1].string());
-		this->set_size(w, h);
-		this->set_position(std::stoi(data.map()[L"position"].vector()[0].string()), std::stoi(data.map()[L"position"].vector()[1].string()));
+		::MoveWindow(
+			this->get_hwnd(),
+			std::stoi(data.map()[L"position"].vector()[0].string()),
+			std::stoi(data.map()[L"position"].vector()[1].string()),
+			std::stoi(data.map()[L"size"].vector()[0].string()),
+			std::stoi(data.map()[L"size"].vector()[1].string()),
+			FALSE);
+		int w, h;
+		std::tie(w, h) = this->get_size();
 		view->set_size({static_cast<float>(w), static_cast<float>(h)});
-		view->set_bar_pos(std::stoi(data.map()[L"bar position"].string()));
+		barpos = std::stoi(data.map()[L"bar position"].string());
+		showstate = std::stoi(data.map()[L"show state"].string());
 	}else{
 		this->set_size(1400, 800);
 		view->set_size({1400, 800});
@@ -108,21 +124,25 @@ inline void main_window::uninitialize()
 
 		data.make_map();
 
+		WINDOWPLACEMENT wp ={};
+		wp.length = sizeof wp;
+		::GetWindowPlacement(this->get_hwnd(), &wp);
+
+		data.map()[L"show state"].set_string(std::to_wstring(wp.showCmd));
+
 		int w, h;
 		std::tie(w, h) = this->get_size();
 		data.map()[L"size"].make_vector();
 		data.map()[L"size"].vector().emplace_back();
-		data.map()[L"size"].vector()[0].set_string(std::to_wstring(w));
+		data.map()[L"size"].vector()[0].set_string(std::to_wstring(wp.rcNormalPosition.right - wp.rcNormalPosition.left));
 		data.map()[L"size"].vector().emplace_back();
-		data.map()[L"size"].vector()[1].set_string(std::to_wstring(h));
+		data.map()[L"size"].vector()[1].set_string(std::to_wstring(wp.rcNormalPosition.bottom - wp.rcNormalPosition.top));
 
-		int x, y;
-		std::tie(x, y) = this->get_position();
 		data.map()[L"position"].make_vector();
 		data.map()[L"position"].vector().emplace_back();
-		data.map()[L"position"].vector()[0].set_string(std::to_wstring(x));
+		data.map()[L"position"].vector()[0].set_string(std::to_wstring(wp.rcNormalPosition.left));
 		data.map()[L"position"].vector().emplace_back();
-		data.map()[L"position"].vector()[1].set_string(std::to_wstring(y));
+		data.map()[L"position"].vector()[1].set_string(std::to_wstring(wp.rcNormalPosition.top));
 
 		data.map()[L"bar position"].set_string(std::to_wstring(view->get_bar_pos()));
 
