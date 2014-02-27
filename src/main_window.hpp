@@ -44,7 +44,7 @@ class main_window:
 	std::unique_ptr<main_view> view;
 
 	std::wstring path;
-	int showstate, barpos;
+	int showstate = SW_SHOW, barpos;
 
 	std::vector<std::wstring> files;
 	int index = -1;
@@ -108,9 +108,10 @@ inline bool main_window::initialize()
 		barpos = std::stoi(data.map()[L"bar position"].string());
 		showstate = std::stoi(data.map()[L"show state"].string());
 	}else{
-		this->set_size(1400, 800);
-		view->set_size({1400, 800});
-		view->set_bar_pos(1000);
+		this->set_size(800, 600);
+		view->set_size({800, 600});
+		view->set_bar_pos(600);
+		barpos = 600;
 	}
 
 	return true;

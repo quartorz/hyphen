@@ -4,6 +4,9 @@
 
 #include <quote/direct2d/image.hpp>
 
+#include <Shlwapi.h>
+#pragma comment(lib, "shlwapi")
+
 class main_view_type::picture_view
 	: public direct2d::userdefined_object<main_view_type::picture_view>
 {
@@ -20,7 +23,12 @@ public:
 	void set_file_name(const std::wstring &file)
 	{
 		empty = file.length() == 0;
-		image.set_file_name(file.c_str());
+
+		if(empty || ::PathFileExistsW(file.c_str())){
+			image.set_file_name(file.c_str());
+		}else{
+			set_file_name(L"");
+		}
 	}
 	void set_size(const direct2d::size &s) override
 	{
