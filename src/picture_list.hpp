@@ -13,14 +13,13 @@ class main_view_type::picture_list
 {
 	using base = direct2d::userdefined_object<main_view_type::picture_list>;
 
-	class add_button: public direct2d::flat_button{
+	class button_base: public direct2d::flat_button{
 		using base = direct2d::flat_button;
 
-		main_window &w;
 		std::function<void(void)> cb;
 
 	public:
-		add_button(main_window &w):w(w)
+		button_base()
 		{
 			set_color(state::none, direct2d::color(0, 0, 0, 50));
 			set_color(state::hover, direct2d::color(50, 50, 50, 20));
@@ -49,14 +48,14 @@ class main_view_type::picture_list
 
 	HWND list;
 	HFONT font;
-	add_button button;
+	button_base button;
 
 	direct2d::point pos;
 
 	std::uint32_t index = 1;
 
 public:
-	picture_list(main_window &w): button(w)
+	picture_list(main_window &w)
 	{
 		list = ::CreateWindowExW(
 			0,
@@ -149,5 +148,11 @@ public:
 			::RedrawWindow(list, nullptr, nullptr, RDW_INTERNALPAINT);
 		}
 		pos = p;
+	}
+
+	void draw(const direct2d::paint_params &pp) override
+	{
+		if(this->get_size().width > 50.f)
+			this->base::draw(pp);
 	}
 };

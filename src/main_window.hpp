@@ -79,7 +79,7 @@ public:
 inline void main_window::show()
 {
 	::ShowWindow(this->get_hwnd(), showstate);
-	view->set_bar_pos(barpos);
+	view->set_bar_position(barpos);
 }
 
 inline bool main_window::initialize()
@@ -110,7 +110,7 @@ inline bool main_window::initialize()
 	}else{
 		this->set_size(800, 600);
 		view->set_size({800, 600});
-		view->set_bar_pos(600);
+		view->set_bar_position(600);
 		barpos = 600;
 	}
 
@@ -145,7 +145,7 @@ inline void main_window::uninitialize()
 		data.map()[L"position"].vector().emplace_back();
 		data.map()[L"position"].vector()[1].set_string(std::to_wstring(wp.rcNormalPosition.top));
 
-		data.map()[L"bar position"].set_string(std::to_wstring(view->get_bar_pos()));
+		data.map()[L"bar position"].set_string(std::to_wstring(view->get_bar_position()));
 
 		data.save(ofs, true);
 	}
