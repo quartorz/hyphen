@@ -9,9 +9,10 @@ typedef class main_window::main_view: public direct2d::vertical_split_scene<>
 {
 	using base = direct2d::vertical_split_scene<>;
 
+	main_window &w;
+
 	class picture_view;
 	class picture_list;
-	class resize_bar;
 
 	std::unique_ptr<picture_view> view;
 	std::unique_ptr<picture_list> list;
@@ -30,9 +31,8 @@ public:
 
 #include "picture_view.hpp"
 #include "picture_list.hpp"
-#include "resize_bar.hpp"
 
-inline main_view_type::main_view(main_window &w)
+inline main_view_type::main_view(main_window &w): w(w)
 {
 	view = std::make_unique<picture_view>();
 	list = std::make_unique<picture_list>(w);
@@ -83,6 +83,7 @@ inline void main_view_type::set_size(const direct2d::size &s)
 
 inline void main_view_type::draw(const direct2d::paint_params &pp)
 {
-	pp.target->Clear();
+	if(w.aero_glass_enabled())
+		pp.clear(direct2d::color(0, 0, 0, 0));
 	this->base::draw(pp);
 }

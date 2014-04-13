@@ -16,10 +16,11 @@ class main_view_type::picture_list
 	class button_base: public direct2d::flat_button{
 		using base = direct2d::flat_button;
 
+		main_window &w;
 		std::function<void(void)> cb;
 
 	public:
-		button_base()
+		button_base(main_window &w):w(w)
 		{
 			set_color(state::none, direct2d::color(0, 0, 0, 50));
 			set_color(state::hover, direct2d::color(50, 50, 50, 20));
@@ -39,9 +40,11 @@ class main_view_type::picture_list
 		}
 		void draw(const direct2d::paint_params &pp) override
 		{
-			pp.target->PushAxisAlignedClip(this->get_rect(), D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
-			pp.target->Clear(direct2d::color(0, 0, 0, 0));
-			pp.target->PopAxisAlignedClip();
+			if(w.aero_glass_enabled()){
+				pp.target->PushAxisAlignedClip(this->get_rect(), D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+				pp.target->Clear(direct2d::color(0, 0, 0, 0));
+				pp.target->PopAxisAlignedClip();
+			}
 			this->base::draw(pp);
 		}
 	};
@@ -55,7 +58,7 @@ class main_view_type::picture_list
 	std::uint32_t index = 1;
 
 public:
-	picture_list(main_window &w)
+	picture_list(main_window &w): button(w)
 	{
 		list = ::CreateWindowExW(
 			0,
@@ -97,7 +100,7 @@ public:
 					{L"Graphics Interchange Format", {L".gif"}},
 					{L"JPEG", {L".jpg", L".jpeg"}},
 					{L"All Image Files", {L".bmp", L".png", L".gif", L".jpg", L".jpeg"}}
-			}, index);
+				}, index);
 			bool flag = false;
 			for(auto &file: files){
 				if(w.add_file(file))
